@@ -33,24 +33,35 @@ public class CoolerHandle : MonoBehaviour
     {
         isAttached = true;
 
-        // create joint so cooler drags physically
         Rigidbody coolerRB = transform.parent.GetComponent<Rigidbody>();
+        coolerRB.useGravity = true;
+        coolerRB.isKinematic = false;
+
         joint = coolerRB.gameObject.AddComponent<ConfigurableJoint>();
         joint.connectedBody = player.GetComponent<Rigidbody>();
 
-        // physics settings for dragging feel
+        // Distance of drag
+        SoftJointLimit limit = new SoftJointLimit();
+        limit.limit = 0.5f;
+        joint.linearLimit = limit;
+
         joint.xMotion = ConfigurableJointMotion.Limited;
         joint.yMotion = ConfigurableJointMotion.Limited;
         joint.zMotion = ConfigurableJointMotion.Limited;
 
-        SoftJointLimit limit = new SoftJointLimit();
-        limit.limit = 0.5f; // cooler stays half-meter behind
-        joint.linearLimit = limit;
+        // --- rotation stability ---
+        joint.angularXMotion = ConfigurableJointMotion.Limited;
+        joint.angularYMotion = ConfigurableJointMotion.Limited;
+        joint.angularZMotion = ConfigurableJointMotion.Limited;
 
-        joint.angularXMotion = ConfigurableJointMotion.Free;
-        joint.angularYMotion = ConfigurableJointMotion.Free;
-        joint.angularZMotion = ConfigurableJointMotion.Free;
+        SoftJointLimit rotLimit = new SoftJointLimit();
+        rotLimit.limit = 10f; // small tilt allowed – change to 0 for no tilt
+        joint.lowAngularXLimit = rotLimit;
+        joint.highAngularXLimit = rotLimit;
+        joint.angularYLimit = rotLimit;
+        joint.angularZLimit = rotLimit;
     }
+
 
     void Release()
     {
